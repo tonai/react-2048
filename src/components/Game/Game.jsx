@@ -20,16 +20,18 @@ class Game extends React.PureComponent {
     const keyCode = String(event.keyCode);
     if(Object.keys(KEY_CODES).indexOf(keyCode) !== -1) {
       this.setState(prevState => {
-        const board = this.move(prevState.board, KEY_CODES[keyCode]);
-        this
-          .reduceBoard(board, (acc, tile, colIndex, row, rowIndex) =>
-            tile ? acc.concat(tile) : acc)
-          .forEach(tile => tile.isNew = false);
-        this.addRandomCell(board, prevState.nextId);
-        return {
-          board,
-          nextId: prevState.nextId + 1
-        };
+        const board = this.move(this.cloneBoard(prevState.board), KEY_CODES[keyCode]);
+        if (this.hasBoardDifferences(prevState.board, board)) {
+          this
+            .reduceBoard(board, (acc, tile, colIndex, row, rowIndex) =>
+              tile ? acc.concat(tile) : acc)
+            .forEach(tile => tile.isNew = false);
+          this.addRandomCell(board, prevState.nextId);
+          return {
+            board,
+            nextId: prevState.nextId + 1
+          };
+        }
       });
     }
   };
@@ -67,22 +69,6 @@ class Game extends React.PureComponent {
     this.state = this.getInitialState();
   }
 
-  getInitialState() {
-    const board = [
-      [null, null, null, null],
-      [null, null, null, null],
-      [null, null, null, null],
-      [null, null, null, null]
-    ];
-    this.addRandomCell(board, 0);
-    this.addRandomCell(board, 1);
-    return {
-      board,
-      nextId: 4,
-      status: STATUS_RUNNING
-    };
-  }
-
   findIndex(newLine, value, index) {
     if (index < 0) {
       return index + 1;
@@ -96,6 +82,36 @@ class Game extends React.PureComponent {
         return index + 1;
       }
     }
+  }
+
+  getInitialState() {
+    const board = [
+      [null, null, null, null],
+      [null, null, null, null],
+      [null, null, null, null],
+      [null, null, null, null]
+    ];
+    this.addRandomCell(board, 0);
+    this.addRandomCell(board, 1);
+    return {
+      board,
+      nextId: 2,
+      status: STATUS_RUNNING
+    };
+  }
+
+  hasBoardDifferences(a, b) {
+    return this
+      .reduceBoard(a, (acc, tile, colIndex, row, rowIndex) =>
+        acc.concat(this.hasCellDifferences(tile, b[rowIndex][colIndex]))
+      )
+      .reduce((a, b) => a + b);
+  }
+
+  hasCellDifferences(a, b) {
+    return Boolean(a && !b
+      || !a && b
+      || a && b && a.value !== b.value);
   }
 
   merge(line, reverse = false) {

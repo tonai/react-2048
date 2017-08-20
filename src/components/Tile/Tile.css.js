@@ -25,18 +25,6 @@ const popKeyframes = {
   }
 };
 
-const popBisKeyframes = {
-  '0%': {
-    transform: 'scale(0)'
-  },
-  '50%': {
-    transform: 'scale(1.201)'
-  },
-  '100%': {
-    transform: 'scale(1)'
-  }
-};
-
 export const styles = StyleSheet.create({
   tile: {
     position: 'absolute',
