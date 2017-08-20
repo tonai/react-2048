@@ -17,23 +17,21 @@ class Game extends React.PureComponent {
   handleKey = (event) => {
     const keyCode = String(event.keyCode);
     if(Object.keys(KEY_CODES).indexOf(keyCode) !== -1) {
-      this.setState(prevState => {
-        const board = this.move(this.cloneBoard(prevState.board), KEY_CODES[keyCode]);
-        if (this.hasBoardDifferences(prevState.board, board)) {
-          this
-            .reduceBoard(board, (acc, tile, colIndex, row, rowIndex) =>
-              tile ? acc.concat(tile) : acc)
-            .forEach(tile => tile.isNew = false);
-          this.addRandomCell(board, prevState.nextId);
-          return {board, nextId: prevState.nextId + 1};
-        } else {
-          const availableCells = this.reduceBoard(board, (acc, tile, colIndex, row, rowIndex) =>
-            tile ? acc : acc.concat({row: rowIndex, col: colIndex}));
-          if (availableCells.length === 0 && this.isGameOver(board)) {
-            return {status: STATUS_LOST};
-          }
+      const board = this.move(this.cloneBoard(this.state.board), KEY_CODES[keyCode]);
+      if (this.hasBoardDifferences(this.state.board, board)) {
+        this
+          .reduceBoard(board, (acc, tile, colIndex, row, rowIndex) =>
+            tile ? acc.concat(tile) : acc)
+          .forEach(tile => tile.isNew = false);
+        this.addRandomCell(board, this.state.nextId);
+        this.setState(prevState => ({board, nextId: prevState.nextId + 1}));
+      } else {
+        const availableCells = this.reduceBoard(board, (acc, tile, colIndex, row, rowIndex) =>
+          tile ? acc : acc.concat({row: rowIndex, col: colIndex}));
+        if (availableCells.length === 0 && this.isGameOver(board)) {
+          this.setState(prevState => ({status: STATUS_LOST}));
         }
-      });
+      }
     }
   };
 
@@ -104,6 +102,7 @@ class Game extends React.PureComponent {
     this.addRandomCell(board, 1);
     return {
       board,
+      score: 0,
       nextId: 16,
       status: STATUS_RUNNING
     };
@@ -143,6 +142,7 @@ class Game extends React.PureComponent {
             newLine[newIndex].value = newLine[newIndex].value + tile.value;
             newLine[newIndex].mergedTile = tile;
             line[index] = null;
+            this.setState(prevState => ({score: prevState.score + tile.value * 2}));
           } else {
             newLine[newIndex] = tile;
           }
@@ -173,6 +173,7 @@ class Game extends React.PureComponent {
       <div>
         <Board board={this.state.board} />
         <div className={css(styles.message)} >
+          <p>Score : {this.state.score}</p>
           {this.state.status === STATUS_LOST && (
             <p>Game over</p>
           )}
