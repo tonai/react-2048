@@ -5,7 +5,7 @@ import { css } from 'aphrodite';
 import Tile from '../Tile/Tile.jsx';
 import { styles } from './Board.css';
 
-function Board({board, status}) {
+function Board({board}) {
   const tiles = board.reduce((acc, row, rowIndex) => {
     row = row.map((tile, colIndex) => ({...tile, col: colIndex, row: rowIndex}));
     const visibleTiles = row

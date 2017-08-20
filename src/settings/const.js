@@ -23,4 +23,3 @@ export const TILE_BACKGROUND_COLORS = [
 
 export const STATUS_LOST = 'STATUS_LOST';
 export const STATUS_RUNNING = 'STATUS_RUNNING';
-export const STATUS_WIN = 'STATUS_WIN';

@@ -4,12 +4,10 @@ import { css } from 'aphrodite';
 import {
   KEY_BOTTOM,
   KEY_CODES,
-  KEY_LEFT,
   KEY_RIGHT,
   KEY_TOP,
   STATUS_LOST,
-  STATUS_RUNNING,
-  STATUS_WIN,
+  STATUS_RUNNING
 } from '../../settings/const';
 
 import Board from '../Board/Board.jsx';
@@ -27,10 +25,13 @@ class Game extends React.PureComponent {
               tile ? acc.concat(tile) : acc)
             .forEach(tile => tile.isNew = false);
           this.addRandomCell(board, prevState.nextId);
-          return {
-            board,
-            nextId: prevState.nextId + 1
-          };
+          return {board, nextId: prevState.nextId + 1};
+        } else {
+          const availableCells = this.reduceBoard(board, (acc, tile, colIndex, row, rowIndex) =>
+            tile ? acc : acc.concat({row: rowIndex, col: colIndex}));
+          if (availableCells.length === 0 && this.isGameOver(board)) {
+            return {status: STATUS_LOST};
+          }
         }
       });
     }
@@ -50,6 +51,14 @@ class Game extends React.PureComponent {
       isNew: true,
       value
     };
+  }
+
+  canTileBeMerged(board, rowIndex, colIndex) {
+    const value = board[rowIndex][colIndex].value;
+    return Boolean((board[rowIndex - 1] && board[rowIndex - 1][colIndex].value === value)
+      || (board[rowIndex + 1] && board[rowIndex + 1][colIndex].value === value)
+      || (board[rowIndex][colIndex - 1] && board[rowIndex][colIndex - 1].value === value)
+      || (board[rowIndex][colIndex + 1] && board[rowIndex][colIndex + 1].value === value));
   }
 
   cloneBoard(board) {
@@ -95,7 +104,7 @@ class Game extends React.PureComponent {
     this.addRandomCell(board, 1);
     return {
       board,
-      nextId: 2,
+      nextId: 16,
       status: STATUS_RUNNING
     };
   }
@@ -109,9 +118,17 @@ class Game extends React.PureComponent {
   }
 
   hasCellDifferences(a, b) {
-    return Boolean(a && !b
-      || !a && b
-      || a && b && a.value !== b.value);
+    return Boolean((a && !b)
+      || (!a && b)
+      || (a && b && a.value !== b.value));
+  }
+
+  isGameOver(board) {
+    return !this
+      .reduceBoard(board, (acc, tile, colIndex, row, rowIndex) =>
+        acc.concat(this.canTileBeMerged(board, rowIndex, colIndex))
+      )
+      .reduce((a, b) => a + b);
   }
 
   merge(line, reverse = false) {
@@ -154,11 +171,11 @@ class Game extends React.PureComponent {
   render() {
     return (
       <div>
-        <Board
-          board={this.state.board}
-          status={this.state.status}
-        />
-      <div className={css(styles.message)} >
+        <Board board={this.state.board} />
+        <div className={css(styles.message)} >
+          {this.state.status === STATUS_LOST && (
+            <p>Game over</p>
+          )}
           <button onClick={this.restart} >Restart</button>
         </div>
       </div>
