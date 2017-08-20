@@ -59,10 +59,5 @@ export const styles = StyleSheet.create({
     animationName: popKeyframes,
     animationDuration: '200ms',
     zIndex: 1
-  },
-  tileMergedBis: {
-    animationName: popBisKeyframes,
-    animationDuration: '200ms',
-    zIndex: 1
   }
 });

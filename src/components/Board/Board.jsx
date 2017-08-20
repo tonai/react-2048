@@ -28,6 +28,7 @@ function Board({board, status}) {
             col={tile.col}
             isNew={Boolean(tile.isNew)}
             key={tile.id}
+            id={tile.id}
             merged={Boolean(tile.mergedTile)}
             row={tile.row}
             value={tile.value}

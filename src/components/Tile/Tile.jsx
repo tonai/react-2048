@@ -13,21 +13,15 @@ import {
 import { styles } from './Tile.css';
 
 class Tile extends React.PureComponent {
-  componentWillUpdate(nextProps) {
-    if (nextProps.merged) {
-      if (this.state.mergedClassName === styles.tileMerged) {
-        this.setState({mergedClassName: styles.tileMergedBis});
-      } else {
-        this.setState({mergedClassName: styles.tileMerged});
-      }
-    } else {
-      this.setState({mergedClassName: ''});
+  componentWillUpdate(nextProps, nextState) {
+    if (nextState.merge && this.state.merge) {
+      this.setState({merge: false});
     }
   }
 
   constructor(props) {
     super(props);
-    this.state = {mergedClassName: ''};
+    this.state = {merge: false};
   }
 
   getPow(value) {
@@ -49,12 +43,15 @@ class Tile extends React.PureComponent {
       left: `${this.props.col * (TILE_WIDTH + TILE_GUTTER)}px`,
       top: `${this.props.row * (TILE_WIDTH + TILE_GUTTER)}px`
     };
+    if (this.props.merged) {
+      setTimeout(() => this.setState({merge: true}), 0);
+    }
     return (
       <div
         className={css(
           styles.tile,
           this.props.isNew && styles.tileNew,
-          this.state.mergedClassName
+          this.state.merge && styles.tileMerged,
         )}
         style={style}
       >{this.props.value}</div>
