@@ -74,12 +74,8 @@ class Game extends React.PureComponent {
       [null, null, null, null],
       [null, null, null, null]
     ];
-    board[0][0] = {value: 2, id: 0};
-    board[0][1] = {value: 2, id: 1};
-    board[0][2] = {value: 4, id: 2};
-    board[1][0] = {value: 8, id: 3};
-    // this.addRandomCell(board, 0);
-    // this.addRandomCell(board, 1);
+    this.addRandomCell(board, 0);
+    this.addRandomCell(board, 1);
     return {
       board,
       nextId: 4,
