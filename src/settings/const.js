@@ -1,12 +1,12 @@
-export const KEY_BOTTOM = 'KEY_BOTTOM';
-export const KEY_LEFT = 'KEY_LEFT';
-export const KEY_RIGHT = 'KEY_RIGHT';
-export const KEY_TOP = 'KEY_TOP';
+export const DIRECTION_DOWN = 'DIRECTION_DOWN';
+export const DIRECTION_LEFT = 'DIRECTION_LEFT';
+export const DIRECTION_RIGHT = 'DIRECTION_RIGHT';
+export const DIRECTION_UP = 'DIRECTION_UP';
 export const KEY_CODES = {
-  37: KEY_LEFT,
-  38: KEY_TOP,
-  39: KEY_RIGHT,
-  40: KEY_BOTTOM
+  37: DIRECTION_LEFT,
+  38: DIRECTION_UP,
+  39: DIRECTION_RIGHT,
+  40: DIRECTION_DOWN
 };
 
 export const TILE_WIDTH = 107;

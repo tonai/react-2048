@@ -1,11 +1,13 @@
 import React from 'react';
 import { css } from 'aphrodite';
+import Swipeable from 'react-swipeable'
 
 import {
-  KEY_BOTTOM,
+  DIRECTION_DOWN,
+  DIRECTION_LEFT,
+  DIRECTION_RIGHT,
+  DIRECTION_UP,
   KEY_CODES,
-  KEY_RIGHT,
-  KEY_TOP,
   STATUS_LOST,
   STATUS_RUNNING
 } from '../../settings/const';
@@ -17,21 +19,7 @@ class Game extends React.PureComponent {
   handleKey = (event) => {
     const keyCode = String(event.keyCode);
     if(Object.keys(KEY_CODES).indexOf(keyCode) !== -1) {
-      const board = this.move(this.cloneBoard(this.state.board), KEY_CODES[keyCode]);
-      if (this.hasBoardDifferences(this.state.board, board)) {
-        this
-          .reduceBoard(board, (acc, tile, colIndex, row, rowIndex) =>
-            tile ? acc.concat(tile) : acc)
-          .forEach(tile => tile.isNew = false);
-        this.addRandomCell(board, this.state.nextId);
-        this.setState(prevState => ({board, nextId: prevState.nextId + 1}));
-      } else {
-        const availableCells = this.reduceBoard(board, (acc, tile, colIndex, row, rowIndex) =>
-          tile ? acc : acc.concat({row: rowIndex, col: colIndex}));
-        if (availableCells.length === 0 && this.isGameOver(board)) {
-          this.setState(prevState => ({status: STATUS_LOST}));
-        }
-      }
+      this.handleDirection(KEY_CODES[keyCode]);
     }
   };
 
@@ -108,6 +96,30 @@ class Game extends React.PureComponent {
     };
   }
 
+  handleDirection(direction) {
+    const board = this.move(this.cloneBoard(this.state.board), direction);
+    if (this.hasBoardDifferences(this.state.board, board)) {
+      this
+        .reduceBoard(board, (acc, tile, colIndex, row, rowIndex) =>
+          tile ? acc.concat(tile) : acc)
+        .forEach(tile => tile.isNew = false);
+      this.addRandomCell(board, this.state.nextId);
+      this.setState(prevState => ({board, nextId: prevState.nextId + 1}));
+    } else {
+      const availableCells = this.reduceBoard(board, (acc, tile, colIndex, row, rowIndex) =>
+        tile ? acc : acc.concat({row: rowIndex, col: colIndex}));
+      if (availableCells.length === 0 && this.isGameOver(board)) {
+        this.setState(prevState => ({status: STATUS_LOST}));
+      }
+    }
+  }
+
+  handleSwipe(direction, event, delta, isFlick) {
+    if (isFlick) {
+      this.handleDirection(direction);
+    }
+  }
+
   hasBoardDifferences(a, b) {
     return this
       .reduceBoard(a, (acc, tile, colIndex, row, rowIndex) =>
@@ -152,11 +164,13 @@ class Game extends React.PureComponent {
   }
 
   move(board, direction) {
-    if (direction === KEY_BOTTOM || direction === KEY_TOP) {
+    if (direction === DIRECTION_DOWN || direction === DIRECTION_UP) {
       board = this.transpose(board);
     }
-    board = board.map(line => this.merge(line, direction === KEY_RIGHT || direction === KEY_BOTTOM));
-    if (direction === KEY_BOTTOM || direction === KEY_TOP) {
+    board = board.map(line =>
+      this.merge(line, direction === DIRECTION_RIGHT || direction === DIRECTION_DOWN)
+    );
+    if (direction === DIRECTION_DOWN || direction === DIRECTION_UP) {
       board = this.transpose(board);
     }
     return board;
@@ -171,7 +185,17 @@ class Game extends React.PureComponent {
   render() {
     return (
       <div>
-        <Board board={this.state.board} />
+        <Swipeable
+          trackMouse
+          style={{ touchAction: 'none' }}
+          preventDefaultTouchmoveEvent
+          onSwipedDown={this.handleSwipe.bind(this, DIRECTION_DOWN)}
+          onSwipedLeft={this.handleSwipe.bind(this, DIRECTION_LEFT)}
+          onSwipedRight={this.handleSwipe.bind(this, DIRECTION_RIGHT)}
+          onSwipedUp={this.handleSwipe.bind(this, DIRECTION_UP)}
+        >
+          <Board board={this.state.board} />
+        </Swipeable>
         <div className={css(styles.message)} >
           <p>Score : {this.state.score}</p>
           {this.state.status === STATUS_LOST && (
